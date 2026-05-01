@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{personal.name}} — CV</title>
+  <style>
+    /* ============================================================
+       LATEX-INSPIRED CSS (Matches cv_output.tex)
+    ============================================================ */
+    
+    @page {
+      size: A4;
+      margin: 1in; /* Standard LaTeX geometry margin */
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Times New Roman", Times, serif; /* Fallback for Latin Modern */
+      font-size: 11pt;
+      line-height: 1.3;
+      color: #000;
+      background: #fff;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Paragraph skip simulation */
+    p { margin-bottom: 4pt; }
+
+    .container {
+      width: 100%;
+    }
+
+    /* ── HEADER (Center Aligned) ── */
+    .header {
+      text-align: center;
+      margin-bottom: 12pt;
+    }
+
+    .header h1 {
+      font-size: 18pt; /* LARGE */
+      font-weight: 700;
+      margin-bottom: 4pt;
+      text-transform: none;
+    }
+
+    .contact-info {
+      font-size: 10.5pt;
+    }
+
+    .contact-info span::after {
+      content: " | ";
+    }
+
+    .contact-info span:last-child::after {
+      content: "";
+    }
+
+    .contact-info a {
+      color: black;
+      text-decoration: none;
+    }
+
+    /* ── SECTION HEADINGS (titlerule) ── */
+    .section {
+      margin-top: 12pt;
+      margin-bottom: 8pt;
+    }
+
+    .section-title {
+      font-size: 12pt; /* large */
+      font-weight: 700; /* bfseries */
+      border-bottom: 0.5pt solid #000; /* titlerule */
+      padding-bottom: 1pt;
+      margin-bottom: 6pt;
+    }
+
+    /* ── ENTRIES (hfill logic) ── */
+    .entry {
+      margin-bottom: 8pt;
+    }
+
+    .entry-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 1pt;
+    }
+
+    .entry-title {
+      font-weight: 700;
+    }
+
+    .entry-date {
+      font-weight: 400;
+    }
+
+    .entry-subtitle {
+      font-style: italic;
+      font-size: 11pt;
+      margin-bottom: 2pt;
+    }
+
+    /* ── LISTS (itemize) ── */
+    ul {
+      margin-left: 1.5em;
+      list-style-type: disc;
+    }
+
+    li {
+      margin-bottom: 2pt;
+      padding-left: 2pt;
+    }
+
+    /* ── SKILLS ── */
+    .skill-item {
+      margin-bottom: 4pt;
+    }
+
+    /* ── PRINT LOGIC ── */
+    @media print {
+      .section, .entry { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>{{personal.name}}</h1>
+    <div class="contact-info">
+      {{#if personal.phone}}<span>{{personal.phone}}</span>{{/if}}
+      {{#if personal.email}}<span><a href="mailto:{{personal.email}}">{{personal.email}}</a></span>{{/if}}
+      {{#if personal.linkedin}}<span><a href="{{personal.linkedin}}">LinkedIn</a></span>{{/if}}
+      {{#if personal.location}}<span>{{personal.location}}</span>{{/if}}
+    </div>
+  </div>
+
+  {{#each layout as |sectionId|}}
+
+    <!-- PROFESSIONAL SUMMARY -->
+    {{#if (eq sectionId "summary")}}
+      {{#if @root.summary}}
+      <div class="section">
+        <div class="section-title">Professional Summary</div>
+        <p>{{@root.summary}}</p>
+      </div>
+      {{/if}}
+    {{/if}}
+
+    <!-- WORK EXPERIENCE -->
+    {{#if (eq sectionId "experience")}}
+      {{#if @root.experience.length}}
+      <div class="section">
+        <div class="section-title">Work Experience</div>
+        {{#each @root.experience}}
+        <div class="entry">
+          <div class="entry-row">
+            <span class="entry-title">{{this.title}}</span>
+            <span class="entry-date">{{this.start_date}} – {{this.end_date}}</span>
+          </div>
+          <div class="entry-subtitle">{{this.company}}{{#if this.location}}, {{this.location}}{{/if}}</div>
+          {{#if this.bullets.length}}
+          <ul>
+            {{#each this.bullets}}<li>{{this}}</li>{{/each}}
+          </ul>
+          {{/if}}
+        </div>
+        {{/each}}
+      </div>
+      {{/if}}
+    {{/if}}
+
+    <!-- PROJECTS -->
+    {{#if (eq sectionId "projects")}}
+      {{#if @root.projects.length}}
+      <div class="section">
+        <div class="section-title">Projects</div>
+        {{#each @root.projects}}
+        <div class="entry">
+          <div class="entry-row">
+            <span class="entry-title">{{this.name}}{{#if this.link}} | <a href="{{this.link}}">Link</a>{{/if}}</span>
+            <span class="entry-date">{{this.start_date}}{{#if this.end_date}} – {{this.end_date}}{{/if}}</span>
+          </div>
+          {{#if this.technologies.length}}
+          <div class="entry-subtitle">Technologies: {{join this.technologies ", "}}</div>
+          {{/if}}
+          {{#if this.bullets.length}}
+          <ul>
+            {{#each this.bullets}}<li>{{this}}</li>{{/each}}
+          </ul>
+          {{/if}}
+        </div>
+        {{/each}}
+      </div>
+      {{/if}}
+    {{/if}}
+
+    <!-- SKILLS -->
+    {{#if (eq sectionId "skills")}}
+      {{#if @root.skills.length}}
+      <div class="section">
+        <div class="section-title">Skills</div>
+        {{#each @root.skills}}
+        <div class="skill-item">
+          <strong>{{this.name}}</strong>: {{join this.items ", "}}
+        </div>
+        {{/each}}
+      </div>
+      {{/if}}
+    {{/if}}
+
+    <!-- CERTIFICATIONS -->
+    {{#if (eq sectionId "certifications")}}
+      {{#if @root.certifications.length}}
+      <div class="section">
+        <div class="section-title">Certifications</div>
+        <ul>
+          {{#each @root.certifications}}
+          <li><strong>{{this.name}}</strong>{{#if this.issuer}} — {{this.issuer}}{{/if}}{{#if this.year}} ({{this.year}}){{/if}}</li>
+          {{/each}}
+        </ul>
+      </div>
+      {{/if}}
+    {{/if}}
+
+    <!-- EDUCATION -->
+    {{#if (eq sectionId "education")}}
+      {{#if @root.education.length}}
+      <div class="section">
+        <div class="section-title">Education</div>
+        {{#each @root.education}}
+        <div class="entry">
+          <div class="entry-row">
+            <span class="entry-title">{{this.degree}}</span>
+            <span class="entry-date">{{#if this.start_date}}{{this.start_date}} – {{/if}}{{this.graduation_year}}</span>
+          </div>
+          <div class="entry-subtitle">{{this.institution}}{{#if this.location}}, {{this.location}}{{/if}}</div>
+        </div>
+        {{/each}}
+      </div>
+      {{/if}}
+    {{/if}}
+
+    <!-- CUSTOM SECTIONS -->
+    {{#each @root.custom_sections as |custom|}}
+      {{#if (eq custom.id sectionId)}}
+        <div class="section">
+          <div class="section-title">{{custom.title}}</div>
+          {{#if custom.bullets.length}}
+          <ul>{{#each custom.bullets}}<li>{{this}}</li>{{/each}}</ul>
+          {{else if custom.content}}
+          <p>{{custom.content}}</p>
+          {{/if}}
+        </div>
+      {{/if}}
+    {{/each}}
+
+  {{/each}}
+
+</div>
+</body>
+</html>

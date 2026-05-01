@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATS CV Generator API — Documentation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --code-bg: #1e293b;
+            --req: #ef4444;
+            --opt: #10b981;
+            --success: #22c55e;
+            --error: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        header {
+            margin-bottom: 3rem;
+        }
+
+        header h2 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .badge-post {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-get {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-req {
+            color: var(--req);
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        .status-opt {
+            color: var(--opt);
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-dark);
+            border-left: 4px solid var(--primary);
+            padding-left: 1rem;
+        }
+
+        h4 {
+            font-size: 1rem;
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 700;
+        }
+
+        .endpoint-url {
+            font-family: 'JetBrains Mono', monospace;
+            background: #f1f5f9;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            display: block;
+            border: 1px solid var(--border);
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #fff;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            margin: 0.5rem 0;
+            position: relative;
+            border-left: 4px solid #94a3b8;
+        }
+
+        pre.success-code {
+            border-left: 4px solid var(--success);
+        }
+
+        pre.error-code {
+            border-left: 4px solid var(--error);
+        }
+
+        .label-code {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .param-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        .param-table th,
+        .param-table td {
+            text-align: left;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .param-table th {
+            background: #f8fafc;
+            color: var(--text-light);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding: 2rem;
+            color: var(--text-light);
+            border-top: 1px solid var(--border);
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <h1>CVGen API</h1>
+        <div style="font-size: 0.9rem; color: var(--text-light);">
+            <span
+                style="height: 8px; width: 8px; background: #22c55e; border-radius: 50%; display: inline-block; margin-right: 4px;"></span>
+            Online
+        </div>
+    </nav>
+
+    <div class="container">
+        <header>
+            <h2>Dokumentasi Lengkap API</h2>
+            <p>Panduan teknis dan skema data lengkap untuk integrasi backend CV Generator.</p>
+        </header>
+
+        <!-- POST GENERATE -->
+        <div class="section">
+            <span class="badge badge-post">POST</span>
+            <h3>1. Generate & Save CV</h3>
+            <span class="endpoint-url">/api/generate</span>
+            <p>Endpoint ini melakukan validasi data, pembuatan PDF, upload cloud storage, dan penyimpanan ke PostgreSQL.
+            </p>
+
+            <h4>Full Request Body Example</h4>
+            <pre>{
+  "cv_title": "Senior Flutter Developer Resume",
+  "layout": ["summary", "experience", "volunteer", "projects", "skills", "education"],
+  "personal": {
+    "name": "Dimas Febriyanto",
+    "email": "dimas@example.com",
+    "phone": "0823-xxxx-xxxx",
+    "location": "Bekasi, Indonesia",
+    "title": "Senior Mobile Engineer",
+    "linkedin": "https://linkedin.com/in/dimassfeb"
+  },
+  "summary": "Software engineer berpengalaman dalam ekosistem Flutter dan Node.js...",
+  "experience": [
+    {
+      "company": "Sagara Technology",
+      "title": "Lead Mobile Developer",
+      "location": "Remote",
+      "start_date": "Jan 2024",
+      "end_date": "Present",
+      "bullets": [
+        "Mengelola arsitektur aplikasi menggunakan BLoC dan Clean Architecture.",
+        "Integrasi sistem pembayaran real-time menggunakan Midtrans API."
+      ]
+    }
+  ],
+  "education": [
+    {
+      "institution": "Universitas Indonesia",
+      "degree": "S1 Teknik Informatika",
+      "graduation_year": "2022"
+    }
+  ],
+  "projects": [
+    {
+      "name": "Dolan App",
+      "link": "https://play.google.com/...",
+      "technologies": ["Flutter", "Firebase", "Go"],
+      "bullets": ["App pemesanan wisata dengan 10rb+ download"]
+    }
+  ],
+  "skills": [
+    { "name": "Mobile", "items": ["Flutter", "Dart", "Swift"] },
+    { "name": "Backend", "items": ["Node.js", "Go", "PostgreSQL"] }
+  ],
+  "certifications": [
+    { "name": "Google Certified Professional", "issuer": "Google", "year": "2025" }
+  ],
+  "custom_sections": [
+    {
+      "id": "volunteer",
+      "title": "Volunteer Work",
+      "bullets": [
+        "Tech Mentor di Google Developer Student Club",
+        "Penyusun modul Flutter untuk komunitas lokal"
+      ]
+    }
+  ]
+}</pre>
+        </div>
+
+        <!-- GET BY ID -->
+        <div class="section">
+            <span class="badge badge-get">GET</span>
+            <h3>2. Get Full CV Details</h3>
+            <span class="endpoint-url">/api/cv/:id</span>
+            <p>Mengambil semua data dari database. Perhatikan format respons yang menyertakan <code>bullets</code> dalam
+                bentuk array JSON.</p>
+
+            <h4>Response Example (Success - 200 OK)</h4>
+            <pre class="success-code">{
+  "success": true,
+  "data": {
+    "cv_id": "72bccb2e-ae04-4d3c-b5ae-5534d6093763",
+    "title": "My Professional Resume 2026",
+    "pdf_url": "https://.../cv-72bccb2e...pdf",
+    "download_url": "https://.../cv-72bccb2e...pdf?token=...",
+    "personal": {
+      "name": "Jhon Doe",
+      "email": "jhondoe@gmail.com",
+      "summary": "Fullstack developer berpengalaman 5 tahun..."
+    },
+    "experience": [
+      {
+        "id": "cfa426b1-7bac-4421-8f91-d18dfec97ca7",
+        "company": "Tech Corp",
+        "position": "Lead Developer",
+        "start_date": "2022",
+        "end_date": "Present",
+        "bullets": ["Memimpin tim 5 orang", "Optimasi DB"]
+      }
+    ],
+    "skills": [
+      { "id": "ae06e8...", "name": "Dart", "category": "Languages" },
+      { "id": "7be698...", "name": "Go", "category": "Languages" }
+    ],
+    "custom_sections": [
+      {
+        "id": "c2a8a750...",
+        "section_id": "volunteer",
+        "title": "Volunteer Work",
+        "bullets": ["Mengajar coding di desa", "Relawan bencana"]
+      }
+    ],
+    "created_at": "2026-05-01T07:04:52.647Z"
+  }
+}</pre>
+        </div>
+        <!-- GET HISTORY BY EMAIL -->
+        <div class="section">
+            <span class="badge badge-get">GET</span>
+            <h3>3. Fetch CV History by Email</h3>
+            <span class="endpoint-url">/api/cv/user/:email</span>
+            <p>Mendapatkan daftar semua CV yang pernah dibuat oleh user berdasarkan alamat email mereka.</p>
+
+            <h4>Response Example (Success - 200 OK)</h4>
+            <pre class="success-code">{
+  "success": true,
+  "count": 2,
+  "cvs": [
+    {
+      "id": "72bccb2e-ae04-4d3c-b5ae-5534d6093763",
+      "title": "My Professional Resume 2026",
+      "pdf_url": "https://.../cv-72bccb2e...pdf",
+      "status": "completed",
+      "created_at": "2026-05-01T07:04:52.647Z"
+    },
+    {
+      "id": "a1b2c3d4-e5f6-4g7h-8i9j-k0l1m2n3o4p5",
+      "title": "CV - Jhon Doe (Updated)",
+      "pdf_url": "https://.../cv-a1b2c3d4...pdf",
+      "status": "completed",
+      "created_at": "2026-04-28T12:00:00.000Z"
+    }
+  ]
+}</pre>
+        </div>
+
+        <footer>
+            &copy; 2026 CVGen API. Build with Node.js & Supabase.
+        </footer>
+    </div>
+
+</body>
+
+</html>

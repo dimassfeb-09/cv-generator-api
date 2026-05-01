@@ -1,0 +1,92 @@
+{
+  "personal": {
+    "name": "Dimas Pratama",
+    "email": "dimas.pratama@example.com",
+    "phone": "+62 812-3456-7890",
+    "linkedin": "https://linkedin.com/in/dimaspratama",
+    "location": "Jakarta, Indonesia"
+  },
+  "summary": "Software Engineer berpengalaman dengan fokus pada pengembangan backend menggunakan Python dan sistem otomasi. Terbiasa bekerja dengan tim agile dan memiliki passion dalam membangun solusi yang efisien dan scalable.",
+  "experience": [
+    {
+      "title": "Senior Backend Developer",
+      "company": "PT. Teknologi Maju",
+      "location": "Jakarta",
+      "start_date": "Jan 2022",
+      "end_date": "Present",
+      "bullets": [
+        "Mengarsiteki sistem microservices menggunakan Python dan FastAPI, meningkatkan throughput data sebesar 40%.",
+        "Mengoptimalkan query database PostgreSQL yang mengurangi waktu load halaman sebesar 25%.",
+        "Memimpin tim 5 orang dalam pengembangan pipeline CI/CD menggunakan GitHub Actions.",
+        "Mengimplementasikan sistem caching Redis yang mengurangi beban server utama pada jam sibuk."
+      ]
+    },
+    {
+      "title": "Junior Web Developer",
+      "company": "Startup Kreatif",
+      "location": "Bandung",
+      "start_date": "Jun 2020",
+      "end_date": "Dec 2021",
+      "bullets": [
+        "Membangun dan memelihara aplikasi web menggunakan Django dan React.",
+        "Integrasi API pihak ketiga untuk sistem pembayaran dan pengiriman.",
+        "Menulis unit test dan audit keamanan pada modul otentikasi."
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Sistem Otomasi CV ATS",
+      "description": "Program CLI untuk membuat CV ramah ATS secara otomatis menggunakan Python dan LaTeX.",
+      "technologies": [
+        "Python",
+        "Jinja2",
+        "LaTeX"
+      ],
+      "link": "https://github.com/dimaspratama/cv-ats-gen",
+      "start_date": "Mar 2026",
+      "end_date": "Apr 2026",
+      "bullets": [
+        "Mengimplementasikan Jinja2 template engine untuk memisahkan data JSON dari desain LaTeX.",
+        "Mengurangi waktu pembuatan CV dari jam ke menit melalui pipeline otomasi."
+      ]
+    }
+  ],
+  "education": [
+    {
+      "degree": "S1 Teknik Informatika",
+      "institution": "Institut Teknologi Harapan",
+      "location": "Bandung",
+      "graduation_year": "2020"
+    }
+  ],
+  "skills": [
+    {
+      "name": "Languages",
+      "items": [
+        "Python",
+        "SQL",
+        "JavaScript",
+        "C++"
+      ]
+    },
+    {
+      "name": "Frameworks/Tools",
+      "items": [
+        "FastAPI",
+        "Django",
+        "PostgreSQL",
+        "Docker",
+        "Git",
+        "Redis"
+      ]
+    }
+  ],
+  "certifications": [
+    {
+      "name": "AWS Certified Solutions Architect",
+      "issuer": "Amazon Web Services",
+      "year": "2023"
+    }
+  ]
+}
