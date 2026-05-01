@@ -11,7 +11,7 @@
     
     @page {
       size: A4;
-      margin: 1in; /* Standard LaTeX geometry margin */
+      margin: 0.4in; /* Standard LaTeX geometry margin */
     }
 
     * {
@@ -68,8 +68,8 @@
 
     /* ── SECTION HEADINGS (titlerule) ── */
     .section {
-      margin-top: 12pt;
-      margin-bottom: 8pt;
+      margin-top: 8pt;
+      margin-bottom: 6pt;
     }
 
     .section-title {
@@ -124,7 +124,7 @@
 
     /* ── PRINT LOGIC ── */
     @media print {
-      .section, .entry { page-break-inside: avoid; }
+      .entry, .skill-item { page-break-inside: avoid; }
     }
   </style>
 </head>
@@ -249,8 +249,8 @@
     {{/if}}
 
     <!-- CUSTOM SECTIONS -->
-    {{#each @root.custom_sections as |custom|}}
-      {{#if (eq custom.id sectionId)}}
+    {{#if (eq sectionId "custom_sections")}}
+      {{#each @root.custom_sections as |custom|}}
         <div class="section">
           <div class="section-title">{{custom.title}}</div>
           {{#if custom.bullets.length}}
@@ -259,8 +259,8 @@
           <p>{{custom.content}}</p>
           {{/if}}
         </div>
-      {{/if}}
-    {{/each}}
+      {{/each}}
+    {{/if}}
 
   {{/each}}
 

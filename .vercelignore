@@ -1,0 +1,5 @@
+cv_builder_app/
+node_modules/
+.git/
+.env
+*.pdf

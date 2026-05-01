@@ -67,21 +67,33 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
+  // 1. Validate Critical Environment Variables
+  const REQUIRED_ENVS = ["DATABASE_URL", "SUPABASE_URL", "SUPABASE_ANON_KEY", "SUPABASE_BUCKET"];
+  const missingEnvs = REQUIRED_ENVS.filter(env => !process.env[env]);
+  if (missingEnvs.length > 0) {
+    console.error(`[generate] Missing configuration: ${missingEnvs.join(", ")}`);
+    return res.status(500).json({ error: "Server configuration error" });
+  }
+
   let browser = null;
   const pool = getPool();
   const dbClient = await pool.connect();
 
   try {
-    const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+    let body;
+  try {
+    body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+  } catch (err) {
+    return res.status(400).json({ error: "Invalid JSON body" });
+  }
     const { data, errors } = validateCVInput(body);
     if (errors) {
       return res.status(422).json({ error: "Validation failed", details: errors });
     }
 
-    // Default layout
-    if (!data.layout || !Array.isArray(data.layout)) {
-      data.layout = ["summary", "experience", "projects", "skills", "certifications", "education"];
-    }
+    // ── Build Dynamic Layout from Request Body Keys ──
+    const SECTION_KEYS = ["summary", "experience", "projects", "skills", "certifications", "education", "custom_sections"];
+    data.layout = Object.keys(body).filter(key => SECTION_KEYS.includes(key));
 
     // ── 1. Generate PDF ──
     browser = await launchBrowser();
@@ -90,7 +102,7 @@ export default async function handler(req, res) {
     const pdfBuffer = await page.pdf({
       format: "A4",
       printBackground: false,
-      margin: { top: "1in", right: "1in", bottom: "1in", left: "1in" },
+      margin: { top: "0.4in", right: "0.4in", bottom: "0.4in", left: "0.4in" },
     });
     await browser.close();
     browser = null;
@@ -223,7 +235,13 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       success: true,
-      cv_id: cvId,
+      data: {
+        id: cvId,
+        cv_title: body.cv_title,
+        created_at: new Date().toISOString(),
+        pdf_url: pdfUrl,
+        signed_url: signedUrl || pdfUrl
+      },
       pdf_url: pdfUrl,
       download_url: signedUrl || pdfUrl
     });

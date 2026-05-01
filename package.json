@@ -8,7 +8,9 @@
   },
   "scripts": {
     "start:dev": "vercel dev",
-    "deploy": "vercel --prod"
+    "build": "echo 'Build not required for this project type'",
+    "deploy": "vercel --prod",
+    "test": "bun test"
   },
   "dependencies": {
     "@sparticuz/chromium": "^148.0.0",
