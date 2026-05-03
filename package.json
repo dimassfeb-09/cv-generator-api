@@ -16,6 +16,8 @@
     "@sparticuz/chromium": "^148.0.0",
     "@supabase/supabase-js": "^2.105.1",
     "handlebars": "^4.7.9",
+    "jsonwebtoken": "^9.0.3",
+    "nodemailer": "^8.0.7",
     "pg": "^8.20.0",
     "puppeteer-core": "^24.42.0",
     "zod": "^3.23.8"

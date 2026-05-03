@@ -1,100 +1,120 @@
 import { getPool } from "../../lib/db.js";
 import { getSignedUrl } from "../../lib/storage.js";
+import { getFullCVData } from "../../lib/cv-service.js";
+import { verifyToken } from "../../lib/auth.js";
 
 /**
- * GET /api/cv/[id]
- * Fetches complete CV data from PostgreSQL by cv_id.
+ * GET & DELETE /api/cv/[id]
  */
 export default async function handler(req, res) {
-  if (req.method !== "GET") {
-    return res.status(405).json({ error: "Method Not Allowed" });
-  }
-
   const { id } = req.query;
   if (!id) return res.status(400).json({ error: "cv_id is required" });
+
+  // 0. Verify JWT
+  let decodedUser;
+  try {
+    decodedUser = verifyToken(req);
+  } catch (authErr) {
+    return res.status(401).json({ error: authErr.message });
+  }
 
   const pool = getPool();
   const dbClient = await pool.connect();
 
   try {
-    // 1. Fetch CV doc and Personal Info
-    const cvResult = await dbClient.query(
-      `SELECT cv.*, pi.job_title, pi.summary, u.name as user_name, u.email as user_email
-       FROM cv_documents cv
-       JOIN users u ON u.id = cv.user_id
-       LEFT JOIN personal_info pi ON pi.cv_id = cv.id
-       WHERE cv.id = $1`,
-      [id]
-    );
+    if (req.method === "GET") {
+      const fullData = await getFullCVData(dbClient, id);
+      if (!fullData) return res.status(404).json({ error: "CV not found" });
 
-    if (cvResult.rows.length === 0) {
-      return res.status(404).json({ error: "CV not found" });
-    }
-
-    const cvData = cvResult.rows[0];
-
-    // 2. Generate a fresh signed URL for the PDF
-    const fileName = `cv-${id}.pdf`;
-    let freshDownloadUrl = cvData.pdf_url;
-    
-    try {
-      const { signedUrl } = await getSignedUrl(fileName);
-      freshDownloadUrl = signedUrl;
-    } catch (storageErr) {
-      console.warn("[GET CV] Storage link refresh failed, falling back to public URL");
-    }
-
-    // 3. Fetch all related entities in parallel
-    const [expRes, eduRes, skillRes, projRes, certRes, customRes] = await Promise.all([
-      dbClient.query(
-        `SELECT e.*, 
-                (SELECT json_agg(b.description ORDER BY b.order_index) 
-                 FROM experience_bullets b WHERE b.experience_id = e.id) as bullets
-         FROM experiences e WHERE e.cv_id = $1`, [id]
-      ),
-      dbClient.query(`SELECT * FROM educations WHERE cv_id = $1`, [id]),
-      dbClient.query(`SELECT * FROM skills WHERE cv_id = $1`, [id]),
-      dbClient.query(
-        `SELECT p.*, 
-                (SELECT json_agg(b.description ORDER BY b.order_index) 
-                 FROM project_bullets b WHERE b.project_id = p.id) as bullets
-         FROM projects p WHERE p.cv_id = $1`, [id]
-      ),
-      dbClient.query(`SELECT * FROM certifications WHERE cv_id = $1`, [id]),
-      dbClient.query(
-        `SELECT cs.*, 
-                (SELECT json_agg(b.description ORDER BY b.order_index) 
-                 FROM custom_section_bullets b WHERE b.custom_section_id = cs.id) as bullets
-         FROM custom_sections cs WHERE cs.cv_id = $1`, [id]
-      )
-    ]);
-
-    // 4. Construct response
-    return res.status(200).json({
-      success: true,
-      data: {
-        cv_id: cvData.id,
-        title: cvData.title,
-        pdf_url: cvData.pdf_url,
-        download_url: freshDownloadUrl,
-        personal: {
-          name: cvData.user_name,
-          email: cvData.user_email,
-          title: cvData.job_title,
-          summary: cvData.summary
-        },
-        experience: expRes.rows,
-        education: eduRes.rows,
-        skills: skillRes.rows,
-        projects: projRes.rows,
-        certifications: certRes.rows,
-        custom_sections: customRes.rows,
-        created_at: cvData.created_at
+      // Ownership Check
+      if (fullData.owner_email !== decodedUser.email) {
+        return res.status(403).json({ error: "Access denied: You do not own this CV" });
       }
-    });
+
+      // Refresh signed URL
+      let downloadUrl = fullData.pdf_url;
+      try {
+        const { signedUrl } = await getSignedUrl(`cv-${id}.pdf`);
+        downloadUrl = signedUrl;
+      } catch (e) {
+        console.warn("[GET CV] Signed URL failed");
+      }
+
+      return res.status(200).json({
+        success: true,
+        data: { ...fullData, download_url: downloadUrl }
+      });
+    } 
+    
+    if (req.method === "DELETE") {
+      const ownerEmail = req.headers["x-owner-email"];
+      const verificationCode = req.headers["x-verification-code"];
+
+      if (!ownerEmail) return res.status(401).json({ error: "Ownership verification required (x-owner-email header)" });
+      if (!verificationCode) return res.status(401).json({ error: "Verification code required (x-verification-code header)" });
+
+      await dbClient.query("BEGIN");
+
+      // 1. Verify OTP
+      const otpRes = await dbClient.query(
+        `SELECT id FROM verification_codes 
+         WHERE email = $1 AND code = $2 AND purpose = 'DELETE_SINGLE' 
+         AND cv_id = $3 AND expires_at > NOW()`,
+        [ownerEmail, verificationCode, id]
+      );
+
+      if (otpRes.rows.length === 0) {
+        await dbClient.query("ROLLBACK");
+        return res.status(400).json({ error: "Invalid or expired verification code" });
+      }
+
+      // 2. Fetch full snapshot for backup
+      const fullData = await getFullCVData(dbClient, id);
+      if (!fullData) {
+        await dbClient.query("ROLLBACK");
+        return res.status(404).json({ error: "CV not found" });
+      }
+
+      // 3. Validate Ownership
+      if (fullData.owner_email !== ownerEmail) {
+        await dbClient.query("ROLLBACK");
+        return res.status(403).json({ error: "You are not authorized to delete this CV" });
+      }
+
+      // 4. Backup to cv_backup
+      await dbClient.query(
+        `INSERT INTO cv_backup (cv_id, owner_email, original_data, deleted_by)
+         VALUES ($1, $2, $3, $4)`,
+        [id, fullData.owner_email, JSON.stringify(fullData), ownerEmail]
+      );
+
+      // 5. Delete from main table
+      await dbClient.query(`DELETE FROM cv_documents WHERE id = $1`, [id]);
+
+      // 6. Delete OTP (one-time use)
+      await dbClient.query(`DELETE FROM verification_codes WHERE id = $1`, [otpRes.rows[0].id]);
+
+      await dbClient.query("COMMIT");
+
+      // 7. Send Notify Email
+      try {
+        const { sendDeletionNotice } = await import("../../lib/email.js");
+        await sendDeletionNotice(ownerEmail, `CV dengan judul "${fullData.title}" (ID: ${id}) telah berhasil dihapus.`);
+      } catch (e) {
+        console.warn("[DELETE NOTICE] Failed to send email notice");
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "CV has been backed up and deleted successfully. Confirmation email sent."
+      });
+    }
+
+    return res.status(405).json({ error: "Method Not Allowed" });
 
   } catch (err) {
-    console.error("[GET CV] Error:", err);
+    if (req.method === "DELETE") await dbClient.query("ROLLBACK");
+    console.error("[API CV ID] Error:", err);
     return res.status(500).json({ error: "Internal Server Error" });
   } finally {
     dbClient.release();

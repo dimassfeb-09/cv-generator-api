@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy | CVGen</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand: #2563eb;
+            --brand-soft: #eff6ff;
+            --bg: #fdfdfd;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --border: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-dark);
+            line-height: 1.8;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Abstract Background Decor */
+        .decor {
+            position: fixed;
+            top: -10%;
+            right: -10%;
+            width: 40vw;
+            height: 40vw;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.05) 0%, rgba(255, 255, 255, 0) 70%);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 100px auto;
+            padding: 0 40px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--brand-soft);
+            color: var(--brand);
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            letter-spacing: -2px;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        /* Section Cards */
+        .policy-section {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            padding: 40px;
+            border-radius: 24px;
+            margin-bottom: 30px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .policy-section:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.02);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h2::before {
+            content: '';
+            width: 12px;
+            height: 12px;
+            background: var(--brand);
+            border-radius: 3px;
+        }
+
+        p,
+        li {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+        }
+
+        ul {
+            list-style: none;
+            margin-top: 15px;
+        }
+
+        li {
+            margin-bottom: 12px;
+            padding-left: 28px;
+            position: relative;
+        }
+
+        li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--brand);
+            font-weight: 700;
+        }
+
+        .highlight {
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 60px;
+            gap: 8px;
+            text-decoration: none;
+            color: var(--brand);
+            font-weight: 600;
+            font-size: 1rem;
+            transition: gap 0.2s ease;
+        }
+
+        .back-btn:hover {
+            gap: 12px;
+        }
+
+        footer {
+            text-align: center;
+            margin: 80px 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 0 24px;
+                margin: 60px auto;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .policy-section {
+                padding: 30px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="decor"></div>
+
+    <div class="container">
+        <header>
+            <span class="badge">Privacy First</span>
+            <h1>Privacy Policy</h1>
+            <p class="subtitle">Effective Date: May 3, 2026</p>
+        </header>
+
+        <div class="policy-section">
+            <h2>Introduction</h2>
+            <p>At <span class="highlight">CVGen</span>, we believe that your professional data belongs to you. This
+                policy outlines how we handle your information with the highest standards of transparency and security
+                during your resume-building journey.</p>
+        </div>
+
+        <div class="policy-section">
+            <h2>Data We Collect</h2>
+            <p>To generate your professional PDF documents, we process information you explicitly provide:</p>
+            <ul>
+                <li><span class="highlight">Personal Details</span>: Name, email, phone number, and location.</li>
+                <li><span class="highlight">Professional History</span>: Work experience, education, and technical
+                    skills.</li>
+                <li><span class="highlight">Social Profiles</span>: Links to LinkedIn, GitHub, or your personal
+                    portfolio.</li>
+            </ul>
+        </div>
+
+        <div class="policy-section">
+            <h2>Encryption & Storage</h2>
+            <p>Your data is treated with enterprise-grade protection:</p>
+            <ul>
+                <li><span class="highlight">End-to-End Security</span>: All data transmissions are encrypted via SSL/TLS
+                    protocols.</li>
+                <li><span class="highlight">Encrypted Database</span>: Text information is stored in encrypted
+                    PostgreSQL databases hosted by Supabase.</li>
+                <li><span class="highlight">Private Storage</span>: Your generated PDF files are stored in private cloud
+                    buckets with time-limited access tokens.</li>
+            </ul>
+        </div>
+
+        <div class="policy-section">
+            <h2>Your Control</h2>
+            <p>We provide you with absolute control over your data. You have the right to:</p>
+            <ul>
+                <li>Request a <span class="highlight">Complete Deletion</span> of your account and all associated CV
+                    data.</li>
+                <li>Access and download your data snapshots at any time.</li>
+                <li>Request a verification code via email for any sensitive data removal.</li>
+            </ul>
+        </div>
+
+        <div class="policy-section">
+            <h2>Third-Party Services</h2>
+            <p>We only use trusted infrastructure providers to power our API:</p>
+            <ul>
+                <li><span class="highlight">Supabase</span> for secure database and file storage.</li>
+                <li><span class="highlight">Vercel</span> for high-performance serverless computing.</li>
+                <li><span class="highlight">Gmail API</span> for secure verification and notifications.</li>
+            </ul>
+        </div>
+
+        <div class="policy-section">
+            <h2>Contact Us</h2>
+            <p>If you have any questions regarding your privacy or data security, please reach out to our team at <span
+                    class="highlight">buildwithdimas@gmail.com</span>.</p>
+        </div>
+
+        <a href="/" class="back-btn">
+            <span>Back to Documentation</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+        </a>
+
+        <footer>
+            <p>&copy; 2026 CVGen API. Crafted with security and privacy in mind.</p>
+        </footer>
+    </div>
+
+</body>
+
+</html>

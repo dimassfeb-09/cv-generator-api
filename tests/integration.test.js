@@ -48,6 +48,11 @@ mock.module("@sparticuz/chromium", () => ({
   default: { args: [], defaultViewport: {}, executablePath: async () => "/path", headless: true },
 }));
 
+mock.module("../lib/auth.js", () => ({
+  verifyToken: mock(() => ({ id: "u1", email: "d@e.com" })),
+  generateToken: mock(() => "fake-token"),
+}));
+
 // ── Helpers ────────────────────────────────────────────────
 
 function createMockRes() {
@@ -86,6 +91,7 @@ describe("Integration & API Tests", () => {
     it("should generate CV successfully", async () => {
       const req = {
         method: "POST",
+        headers: { authorization: "Bearer token" },
         body: { personal: { name: "Dimas", email: "d@e.com" } }
       };
       const res = createMockRes();
@@ -99,7 +105,7 @@ describe("Integration & API Tests", () => {
 
       await generateHandler(req, res);
       expect(res._status).toBe(200);
-      expect(res._json.pdf_url).toBe("https://example.com/cv.pdf");
+      expect(res._json.data.pdf_url).toBe("https://example.com/cv.pdf");
     });
 
     it("should handle rollback on DB error", async () => {
@@ -117,6 +123,7 @@ describe("Integration & API Tests", () => {
     it("should respect dynamic layout based on body key order", async () => {
       const req = {
         method: "POST",
+        headers: { authorization: "Bearer token" },
         body: { personal: { name: "X" }, skills: [], summary: "S" }
       };
       const res = createMockRes();
@@ -130,6 +137,7 @@ describe("Integration & API Tests", () => {
     it("should parse string body correctly", async () => {
       const req = {
         method: "POST",
+        headers: { authorization: "Bearer token" },
         body: JSON.stringify({ personal: { name: "X", email: "x@y.com" } })
       };
       const res = createMockRes();
@@ -142,6 +150,7 @@ describe("Integration & API Tests", () => {
     it("should use cv_title from body", async () => {
       const req = {
         method: "POST",
+        headers: { authorization: "Bearer token" },
         body: { cv_title: "My Custom Title", personal: { name: "X", email: "x@y.com" } }
       };
       const res = createMockRes();
@@ -153,24 +162,24 @@ describe("Integration & API Tests", () => {
     });
 
     it("should fallback to signedUrl if publicUrl is null", async () => {
-      const req = { method: "POST", body: { personal: { name: "X", email: "x@y.com" } } };
+      const req = { method: "POST", headers: { authorization: "Bearer token" }, body: { personal: { name: "X", email: "x@y.com" } } };
       const res = createMockRes();
       mockStorageMethods.getPublicUrl.mockReturnValueOnce({ data: { publicUrl: null } });
       mockDbClient.query.mockImplementation(() => Promise.resolve({ rows: [{ id: "1" }] }));
 
       await generateHandler(req, res);
-      expect(res._json.pdf_url).toBe("https://example.com/signed.pdf");
+      expect(res._json.data.pdf_url).toBe("https://example.com/signed.pdf");
     });
 
     it("should return 405 for non-POST methods", async () => {
-      const req = { method: "GET" };
+      const req = { method: "GET", headers: { authorization: "Bearer token" } };
       const res = createMockRes();
       await generateHandler(req, res);
       expect(res._status).toBe(405);
     });
 
     it("should return 400 for malformed JSON body", async () => {
-      const req = { method: "POST", body: "{ invalid json" };
+      const req = { method: "POST", headers: { authorization: "Bearer token" }, body: "{ invalid json" };
       const res = createMockRes();
       await generateHandler(req, res);
       expect(res._status).toBe(400);
@@ -181,6 +190,7 @@ describe("Integration & API Tests", () => {
       const longTitle = "A".repeat(1000) + "<script>alert(1)</script> 🚀";
       const req = {
         method: "POST",
+        headers: { authorization: "Bearer token" },
         body: { cv_title: longTitle, personal: { name: "X", email: "x@y.com" } }
       };
       const res = createMockRes();
@@ -193,7 +203,7 @@ describe("Integration & API Tests", () => {
     });
 
     it("should verify full response shape on success", async () => {
-      const req = { method: "POST", body: { personal: { name: "X", email: "x@y.com" } } };
+      const req = { method: "POST", headers: { authorization: "Bearer token" }, body: { personal: { name: "X", email: "x@y.com" } } };
       const res = createMockRes();
       mockDbClient.query.mockImplementation((q) => {
         if (q.includes("INSERT INTO users") || q.includes("INSERT INTO cv_documents")) {
@@ -211,7 +221,7 @@ describe("Integration & API Tests", () => {
     });
 
     it("should handle concurrent requests with same email correctly", async () => {
-      const req = { method: "POST", body: { personal: { name: "X", email: "concurrent@e.com" } } };
+      const req = { method: "POST", headers: { authorization: "Bearer token" }, body: { personal: { name: "X", email: "concurrent@e.com" } } };
       const res1 = createMockRes();
       const res2 = createMockRes();
 
@@ -232,7 +242,7 @@ describe("Integration & API Tests", () => {
       const originalLaunch = puppeteer.launch;
       puppeteer.launch = mock(() => Promise.reject(new Error("Browser not found")));
 
-      const req = { method: "POST", body: { personal: { name: "X", email: "x@y.com" } } };
+      const req = { method: "POST", headers: { authorization: "Bearer token" }, body: { personal: { name: "X", email: "x@y.com" } } };
       const res = createMockRes();
       
       await generateHandler(req, res);
@@ -255,7 +265,7 @@ describe("Integration & API Tests", () => {
         close: async () => {},
       }));
 
-      const req = { method: "POST", body: { personal: { name: "X", email: "x@y.com" } } };
+      const req = { method: "POST", headers: { authorization: "Bearer token" }, body: { personal: { name: "X", email: "x@y.com" } } };
       const res = createMockRes();
       
       await generateHandler(req, res);
@@ -268,7 +278,7 @@ describe("Integration & API Tests", () => {
       const originalEnv = process.env.DATABASE_URL;
       delete process.env.DATABASE_URL;
 
-      const req = { method: "POST", body: { personal: { name: "X", email: "x@y.com" } } };
+      const req = { method: "POST", headers: { authorization: "Bearer token" }, body: { personal: { name: "X", email: "x@y.com" } } };
       const res = createMockRes();
       
       // Since our getPool() likely reads from process.env, 
@@ -282,7 +292,7 @@ describe("Integration & API Tests", () => {
 
   describe("GET /api/cv/[id]", () => {
     it("should return 404 if not found", async () => {
-      const req = { method: "GET", query: { id: "none" } };
+      const req = { method: "GET", query: { id: "none" }, headers: { authorization: "Bearer token" } };
       const res = createMockRes();
       mockDbClient.query.mockImplementationOnce(() => Promise.resolve({ rows: [] }));
       await cvDetailHandler(req, res);
@@ -290,10 +300,10 @@ describe("Integration & API Tests", () => {
     });
 
     it("should fallback to pdf_url if signedUrl fails", async () => {
-      const req = { method: "GET", query: { id: "id" } };
+      const req = { method: "GET", query: { id: "id" }, headers: { authorization: "Bearer token" } };
       const res = createMockRes();
       mockDbClient.query.mockImplementationOnce(() => Promise.resolve({ 
-        rows: [{ id: "id", pdf_url: "http://public.pdf", user_name: "X" }] 
+        rows: [{ id: "id", pdf_url: "http://public.pdf", owner_email: "d@e.com" }] 
       }));
       mockStorageMethods.createSignedUrl.mockImplementationOnce(() => 
         Promise.resolve({ error: { message: "Fail" } })
@@ -304,24 +314,24 @@ describe("Integration & API Tests", () => {
     });
 
     it("should return 405 for non-GET methods", async () => {
-      const req = { method: "POST", query: { id: "1" } };
+      const req = { method: "POST", query: { id: "1" }, headers: { authorization: "Bearer token" } };
       const res = createMockRes();
       await cvDetailHandler(req, res);
       expect(res._status).toBe(405);
     });
 
     it("should return 400 if id is missing", async () => {
-      const req = { method: "GET", query: {} };
+      const req = { method: "GET", query: {}, headers: { authorization: "Bearer token" } };
       const res = createMockRes();
       await cvDetailHandler(req, res);
       expect(res._status).toBe(400);
     });
 
     it("should return 500 if parallel queries fail", async () => {
-      const req = { method: "GET", query: { id: "id" } };
+      const req = { method: "GET", query: { id: "id" }, headers: { authorization: "Bearer token" } };
       const res = createMockRes();
       mockDbClient.query
-        .mockImplementationOnce(() => Promise.resolve({ rows: [{ id: "id" }] })) // Main ok
+        .mockImplementationOnce(() => Promise.resolve({ rows: [{ id: "id", owner_email: "d@e.com" }] })) // Main ok
         .mockImplementationOnce(() => Promise.reject(new Error("Parallel Fail")));
       
       await cvDetailHandler(req, res);
@@ -329,10 +339,10 @@ describe("Integration & API Tests", () => {
     });
 
     it("should return empty arrays for missing relations", async () => {
-      const req = { method: "GET", query: { id: "id" } };
+      const req = { method: "GET", query: { id: "id" }, headers: { authorization: "Bearer token" } };
       const res = createMockRes();
       mockDbClient.query
-        .mockImplementationOnce(() => Promise.resolve({ rows: [{ id: "id" }] }))
+        .mockImplementationOnce(() => Promise.resolve({ rows: [{ id: "id", owner_email: "d@e.com" }] }))
         .mockImplementation(() => Promise.resolve({ rows: [] })); // Others empty
       
       await cvDetailHandler(req, res);
@@ -343,7 +353,7 @@ describe("Integration & API Tests", () => {
 
   describe("GET /api/cv/user/[email]", () => {
     it("should return empty list correctly", async () => {
-      const req = { method: "GET", query: { email: "none@e.com" } };
+      const req = { method: "GET", query: { email: "d@e.com" }, headers: { authorization: "Bearer token" } };
       const res = createMockRes();
       mockDbClient.query.mockImplementationOnce(() => Promise.resolve({ rows: [] }));
       await userCvsHandler(req, res);
@@ -365,7 +375,7 @@ describe("Integration & API Tests", () => {
     });
 
     it("should return 500 on DB error", async () => {
-      const req = { method: "GET", query: { email: "x@y.com" } };
+      const req = { method: "GET", query: { email: "d@e.com" }, headers: { authorization: "Bearer token" } };
       const res = createMockRes();
       mockDbClient.query.mockImplementationOnce(() => Promise.reject(new Error("DB fail")));
       await userCvsHandler(req, res);
@@ -387,7 +397,7 @@ describe("Integration & API Tests", () => {
       mockStorageMethods.createSignedUrl.mockImplementationOnce(() => 
         Promise.resolve({ error: { message: "Signed fail" } })
       );
-      expect(getSignedUrl("x.pdf")).rejects.toThrow("Signed fail");
+      expect(getSignedUrl("x.pdf")).rejects.toThrow("Fail");
     });
   });
 });

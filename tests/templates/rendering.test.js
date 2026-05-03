@@ -119,7 +119,7 @@ describe("CV Template Rendering", () => {
       projects: [{ name: "App", technologies: ["Go", "Flutter"], link: "https://example.com" }]
     };
     const html = compiledTemplate(data);
-    expect(html).toContain("Technologies: Go, Flutter");
+    expect(html).toContain("<strong>Technologies:</strong> Go, Flutter");
     expect(html).toContain('href="https://example.com"');
   });
 

@@ -7,6 +7,7 @@ import chromium from "@sparticuz/chromium";
 import { validateCVInput } from "../lib/validator.js";
 import { getPool } from "../lib/db.js";
 import { uploadPdf } from "../lib/storage.js";
+import { verifyToken } from "../lib/auth.js";
 
 // ── ESM __dirname shim ───────────────────────────────────────
 const __filename = fileURLToPath(import.meta.url);
@@ -19,6 +20,10 @@ Handlebars.registerHelper("join", (arr, separator) => {
 });
 
 Handlebars.registerHelper("eq", (a, b) => a === b);
+Handlebars.registerHelper("displayUrl", (url) => {
+  if (typeof url !== "string") return "";
+  return url.replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/$/, "");
+});
 
 const templatePath = path.resolve(__dirname, "../templates/cv.hbs");
 const templateSource = fs.readFileSync(templatePath, "utf-8");
@@ -65,6 +70,14 @@ export default async function handler(req, res) {
 
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method Not Allowed" });
+  }
+
+  // 0. Verify JWT
+  let decodedUser;
+  try {
+    decodedUser = verifyToken(req);
+  } catch (authErr) {
+    return res.status(401).json({ error: authErr.message });
   }
 
   // 1. Validate Critical Environment Variables
@@ -116,36 +129,35 @@ export default async function handler(req, res) {
     // ── 3. DB Transaction ──
     await dbClient.query("BEGIN");
 
-    // 3a. Upsert user by email (Create if not exists, Update if exists)
-    const userResult = await dbClient.query(
-      `INSERT INTO users (id, name, email, phone, location)
-       VALUES ($1, $2, $3, $4, $5)
-       ON CONFLICT (email) DO UPDATE 
-       SET name = EXCLUDED.name, phone = EXCLUDED.phone, location = EXCLUDED.location
-       RETURNING id`,
-      [
-        crypto.randomUUID(),
-        data.personal.name,
-        data.personal.email,
-        data.personal.phone || null,
-        data.personal.location || null
-      ]
-    );
-    const userId = userResult.rows[0].id;
-
+    const userId = decodedUser.id;
     const cvTitle = body.cv_title || `CV - ${data.personal.name}`;
 
     // 3b. Insert CV Document
     await dbClient.query(
-      "INSERT INTO cv_documents (id, user_id, title, pdf_url) VALUES ($1, $2, $3, $4)",
-      [cvId, userId, cvTitle, pdfUrl]
+      "INSERT INTO cv_documents (id, user_id, title, pdf_url, layout) VALUES ($1, $2, $3, $4, $5)",
+      [cvId, userId, cvTitle, pdfUrl, body.layout || null]
     );
 
-    // 3c. Personal Info
+    // 3c. Personal Info (CV-specific contact info)
     await dbClient.query(
-      `INSERT INTO personal_info (id, cv_id, job_title, summary)
-       VALUES ($1, $2, $3, $4)`,
-      [crypto.randomUUID(), cvId, data.personal.title || null, data.summary || null]
+      `INSERT INTO personal_info (
+        id, cv_id, name, email, phone, job_title, 
+        location, linkedin, github, website, summary
+      )
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+      [
+        crypto.randomUUID(), 
+        cvId, 
+        data.personal.name,
+        data.personal.email,
+        data.personal.phone || null,
+        data.personal.title || null,
+        data.personal.location || null,
+        data.personal.linkedin || null,
+        data.personal.github || null,
+        data.personal.website || null,
+        data.summary || null
+      ]
     );
 
     // 3d. Experience
@@ -171,7 +183,15 @@ export default async function handler(req, res) {
       await dbClient.query(
         `INSERT INTO educations (id, cv_id, institution, degree, start_date, end_date, gpa)
          VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-        [crypto.randomUUID(), cvId, edu.institution, edu.degree, edu.start_date || null, edu.graduation_year || null, edu.gpa || null]
+        [
+          crypto.randomUUID(), 
+          cvId, 
+          edu.institution, 
+          edu.degree, 
+          edu.start_date || null, 
+          edu.end_date || edu.graduation_year || null, 
+          edu.gpa || null
+        ]
       );
     }
 
@@ -190,9 +210,18 @@ export default async function handler(req, res) {
     for (const proj of (data.projects || [])) {
       const projId = crypto.randomUUID();
       await dbClient.query(
-        `INSERT INTO projects (id, cv_id, name, description, url, start_date, end_date)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-        [projId, cvId, proj.name, proj.description || null, proj.link || null, proj.start_date || null, proj.end_date || null]
+        `INSERT INTO projects (id, cv_id, name, description, url, start_date, end_date, technologies)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [
+          projId, 
+          cvId, 
+          proj.name, 
+          proj.description || null, 
+          proj.link || null, 
+          proj.start_date || null, 
+          proj.end_date || null,
+          proj.technologies || null
+        ]
       );
       // Bullets
       for (let i = 0; i < (proj.bullets || []).length; i++) {
@@ -217,9 +246,9 @@ export default async function handler(req, res) {
     for (const cs of (data.custom_sections || [])) {
       const csId = crypto.randomUUID();
       await dbClient.query(
-        `INSERT INTO custom_sections (id, cv_id, section_id, title)
-         VALUES ($1, $2, $3, $4)`,
-        [csId, cvId, cs.id, cs.title]
+        `INSERT INTO custom_sections (id, cv_id, section_id, title, content)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [csId, cvId, cs.id, cs.title, cs.content || null]
       );
       // Custom Bullets
       for (let i = 0; i < (cs.bullets || []).length; i++) {
@@ -241,9 +270,7 @@ export default async function handler(req, res) {
         created_at: new Date().toISOString(),
         pdf_url: pdfUrl,
         signed_url: signedUrl || pdfUrl
-      },
-      pdf_url: pdfUrl,
-      download_url: signedUrl || pdfUrl
+      }
     });
 
   } catch (err) {

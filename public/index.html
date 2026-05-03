@@ -4,99 +4,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ATS CV Generator API — Documentation</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono&display=swap"
+    <title>CVGen API — Documentation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
     <style>
         :root {
             --primary: #2563eb;
-            --primary-dark: #1e40af;
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --text: #1e293b;
+            --primary-light: #eff6ff;
+            --sidebar-bg: #f8fafc;
+            --text-main: #0f172a;
             --text-light: #64748b;
             --border: #e2e8f0;
-            --code-bg: #1e293b;
-            --req: #ef4444;
-            --opt: #10b981;
-            --success: #22c55e;
+            --accent: #10b981;
             --error: #ef4444;
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            scroll-behavior: smooth;
         }
 
         body {
             font-family: 'Outfit', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
+            background: #ffffff;
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
         }
 
-        .navbar {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border);
-            padding: 1rem 2rem;
+        /* SIDEBAR */
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            height: 100vh;
             position: sticky;
             top: 0;
-            z-index: 100;
+            padding: 40px 20px;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            gap: 30px;
         }
 
-        .navbar h1 {
-            font-size: 1.25rem;
+        .sidebar-brand {
+            font-size: 1.5rem;
             font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-nav-item {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-nav-link {
+            display: block;
+            padding: 12px 15px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-light);
+            font-weight: 500;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .sidebar-nav-link:hover {
+            background: #f1f5f9;
             color: var(--primary);
         }
 
-        .container {
+        .sidebar-nav-link.active {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            padding: 60px 80px;
             max-width: 1100px;
-            margin: 3rem auto;
-            padding: 0 2rem;
         }
 
         header {
-            margin-bottom: 3rem;
+            margin-bottom: 60px;
         }
 
-        header h2 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
         }
 
         header p {
+            font-size: 1.2rem;
             color: var(--text-light);
-            font-size: 1.1rem;
         }
 
+        /* API SECTION */
         .section {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            margin-bottom: 80px;
+            padding-top: 20px;
+        }
+
+        .section-header {
+            margin-bottom: 25px;
         }
 
         .badge {
             display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 99px;
+            padding: 4px 12px;
+            border-radius: 8px;
             font-size: 0.75rem;
             font-weight: 700;
             text-transform: uppercase;
-            margin-bottom: 1rem;
+            margin-bottom: 15px;
         }
 
         .badge-post {
             background: #dcfce7;
-            color: #166534;
+            color: #15803d;
         }
 
         .badge-get {
@@ -104,146 +144,215 @@
             color: #1e40af;
         }
 
-        .status-req {
-            color: var(--req);
-            font-weight: 600;
-            font-size: 0.8rem;
+        .badge-delete {
+            background: #fee2e2;
+            color: #b91c1c;
         }
 
-        .status-opt {
-            color: var(--opt);
-            font-weight: 600;
-            font-size: 0.8rem;
-        }
-
-        h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: var(--primary-dark);
-            border-left: 4px solid var(--primary);
-            padding-left: 1rem;
-        }
-
-        h4 {
-            font-size: 1rem;
-            margin-top: 2rem;
-            margin-bottom: 0.75rem;
-            color: var(--text);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+        h2 {
+            font-size: 2rem;
             font-weight: 700;
+            margin-bottom: 10px;
         }
 
         .endpoint-url {
             font-family: 'JetBrains Mono', monospace;
             background: #f1f5f9;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            margin-bottom: 1.5rem;
-            display: block;
-            border: 1px solid var(--border);
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            display: inline-block;
+            margin-bottom: 20px;
         }
 
+        h3 {
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-light);
+            margin: 25px 0 15px;
+        }
+
+        /* CODE BLOCKS */
         pre {
-            background: var(--code-bg);
-            color: #fff;
-            padding: 1.5rem;
-            border-radius: 8px;
-            overflow-x: auto;
+            background: #0f172a;
+            color: #f8fafc;
+            padding: 25px;
+            border-radius: 16px;
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.85rem;
-            margin: 0.5rem 0;
+            line-height: 1.6;
+            overflow-x: auto;
             position: relative;
-            border-left: 4px solid #94a3b8;
+            margin-bottom: 20px;
         }
 
-        pre.success-code {
-            border-left: 4px solid var(--success);
-        }
-
-        pre.error-code {
-            border-left: 4px solid var(--error);
-        }
-
-        .label-code {
+        .code-label {
+            position: absolute;
+            top: 10px;
+            right: 15px;
             font-size: 0.7rem;
             color: #94a3b8;
             text-transform: uppercase;
-            margin-bottom: 4px;
-            display: block;
         }
 
-        .param-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1.5rem 0;
+        /* TABLES */
+        .header-box {
+            background: #fffbeb;
+            border: 1px solid #fef3c7;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .header-box p {
             font-size: 0.9rem;
-        }
-
-        .param-table th,
-        .param-table td {
-            text-align: left;
-            padding: 0.75rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .param-table th {
-            background: #f8fafc;
-            color: var(--text-light);
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.05em;
+            color: #92400e;
         }
 
         footer {
-            text-align: center;
-            margin-top: 4rem;
-            padding: 2rem;
-            color: var(--text-light);
+            margin-top: 100px;
+            padding-top: 40px;
             border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-light);
+            padding-bottom: 60px;
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1100px) {
+            .sidebar {
+                width: 220px;
+            }
+
+            .main-content {
+                padding: 40px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .main-content {
+                padding: 30px 20px;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <nav class="navbar">
-        <h1>CVGen API</h1>
-        <div style="font-size: 0.9rem; color: var(--text-light);">
-            <span
-                style="height: 8px; width: 8px; background: #22c55e; border-radius: 50%; display: inline-block; margin-right: 4px;"></span>
-            Online
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            CVGen API
         </div>
-    </nav>
 
-    <div class="container">
-        <header>
-            <h2>Dokumentasi Lengkap API</h2>
-            <p>Panduan teknis dan skema data lengkap untuk integrasi backend CV Generator.</p>
+        <nav>
+            <ul class="sidebar-nav">
+                <li class="sidebar-nav-item"><a href="#intro" class="sidebar-nav-link">Pengenalan</a></li>
+                <li class="sidebar-nav-item"><a href="#auth" class="sidebar-nav-link">0. Authentication (Login)</a></li>
+                <li class="sidebar-nav-item"><a href="#generate" class="sidebar-nav-link">1. Generate CV</a></li>
+                <li class="sidebar-nav-item"><a href="#details" class="sidebar-nav-link">2. Get CV Details</a></li>
+                <li class="sidebar-nav-item"><a href="#history" class="sidebar-nav-link">3. User History</a></li>
+                <li class="sidebar-nav-item"><a href="#deletion" class="sidebar-nav-link">4. Deletion System
+                        (Secure)</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header id="intro">
+            <h1>Dokumentasi API</h1>
+            <p>Solusi lengkap untuk pembuatan CV ATS otomatis, pengelolaan dokumen, dan penghapusan data aman.</p>
         </header>
 
-        <!-- POST GENERATE -->
-        <div class="section">
-            <span class="badge badge-post">POST</span>
-            <h3>1. Generate & Save CV</h3>
-            <span class="endpoint-url">/api/generate</span>
-            <p>Endpoint ini melakukan validasi data, pembuatan PDF, upload cloud storage, dan penyimpanan ke PostgreSQL.
-            </p>
+        <!-- AUTHENTICATION -->
+        <section id="auth" class="section">
+            <div class="section-header">
+                <span class="badge badge-post">POST</span>
+                <h2>Authentication (OTP Login)</h2>
+                <p>Sistem login tanpa password menggunakan verifikasi kode ke email Gmail.</p>
+            </div>
 
-            <h4>Full Request Body Example</h4>
-            <pre>{
-  "cv_title": "Senior Flutter Developer Resume",
-  "layout": ["summary", "experience", "volunteer", "projects", "skills", "education"],
+            <h3>Langkah 1: Request Login OTP</h3>
+            <div class="endpoint-url">/api/auth/login/request</div>
+            <pre><span class="code-label">Request Body</span>{
+  "email": "dimassfeb@gmail.com"
+}</pre>
+
+            <h3 style="margin-top: 30px;">Langkah 2: Verify Login OTP</h3>
+            <div class="endpoint-url">/api/auth/login/verify</div>
+            <pre><span class="code-label">Request Body</span>{ 
+  "email": "dimassfeb@gmail.com", 
+  "code": "123456" 
+}</pre>
+
+            <h3>Response Sukses (Login)</h3>
+            <pre><span class="code-label">Response JSON</span>{
+  "success": true,
+  "message": "Login successful",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "72bccb2e-ae04-4d3c-b5ae-5534d6093763",
+    "email": "dimassfeb@gmail.com",
+    "name": "dimassfeb",
+    "created_at": "2026-05-01T07:04:52.647Z"
+  }
+}</pre>
+        </section>
+
+        <!-- GENERATE -->
+        <section id="generate" class="section">
+            <div class="section-header">
+                <span class="badge badge-post">POST</span>
+                <h2>1. Generate & Save CV</h2>
+                <div class="endpoint-url">/api/generate</div>
+                <p>Membuat file PDF dan menyimpan data. <strong>Wajib menggunakan token login.</strong></p>
+            </div>
+
+            <div class="header-box">
+                <p><strong>Header Wajib:</strong><br>
+                    <code>Authorization</code>: Bearer &lt;token_jwt&gt;
+                </p>
+            </div>
+
+            <h3>Request Body Lengkap</h3>
+            <pre><span class="code-label">Request JSON</span>{
+  "cv_title": "Resume 2026",
+  "layout": ["summary", "experience", "education", "skills", "projects"],
   "personal": {
     "name": "Dimas Febriyanto",
-    "email": "dimas@example.com",
-    "phone": "0823-xxxx-xxxx",
+    "email": "work.dimas@gmail.com",
+    "phone": "0823-1234-5678",
+    "title": "Senior Flutter Developer",
     "location": "Bekasi, Indonesia",
-    "title": "Senior Mobile Engineer",
-    "linkedin": "https://linkedin.com/in/dimassfeb"
+    "github": "https://github.com/dimassfeb",
+    "linkedin": "https://linkedin.com/in/dimassfeb",
+    "website": "https://dimassfeb.com"
   },
-  "summary": "Software engineer berpengalaman dalam ekosistem Flutter dan Node.js...",
+  "summary": "Software Engineer berpengalaman dengan fokus pada ekosistem Flutter...",
   "experience": [
     {
       "company": "Sagara Technology",
@@ -252,127 +361,190 @@
       "start_date": "Jan 2024",
       "end_date": "Present",
       "bullets": [
-        "Mengelola arsitektur aplikasi menggunakan BLoC dan Clean Architecture.",
-        "Integrasi sistem pembayaran real-time menggunakan Midtrans API."
+        "Mengembangkan arsitektur aplikasi menggunakan Clean Architecture",
+        "Optimasi performa aplikasi hingga 40%"
       ]
     }
   ],
   "education": [
     {
-      "institution": "Universitas Indonesia",
+      "institution": "Gunadarma University",
       "degree": "S1 Teknik Informatika",
-      "graduation_year": "2022"
+      "location": "Depok",
+      "start_date": "2021",
+      "end_date": "2025",
+      "gpa": 3.85
     }
+  ],
+  "skills": [
+    { "name": "Programming", "items": ["Dart", "Go", "TypeScript"] },
+    { "name": "Framework", "items": ["Flutter", "Node.js", "React"] }
   ],
   "projects": [
     {
       "name": "Dolan App",
+      "description": "Aplikasi travel marketplace",
       "link": "https://play.google.com/...",
-      "technologies": ["Flutter", "Firebase", "Go"],
-      "bullets": ["App pemesanan wisata dengan 10rb+ download"]
+      "technologies": ["Flutter", "Go", "Supabase"],
+      "bullets": ["Digunakan oleh 10,000+ pengguna"]
     }
-  ],
-  "skills": [
-    { "name": "Mobile", "items": ["Flutter", "Dart", "Swift"] },
-    { "name": "Backend", "items": ["Node.js", "Go", "PostgreSQL"] }
-  ],
-  "certifications": [
-    { "name": "Google Certified Professional", "issuer": "Google", "year": "2025" }
   ],
   "custom_sections": [
     {
-      "id": "volunteer",
-      "title": "Volunteer Work",
-      "bullets": [
-        "Tech Mentor di Google Developer Student Club",
-        "Penyusun modul Flutter untuk komunitas lokal"
-      ]
+      "title": "Languages",
+      "content": "Proficient in English and Indonesian",
+      "bullets": ["English (TOEFL 600)", "Native Indonesian"]
     }
   ]
 }</pre>
-        </div>
 
-        <!-- GET BY ID -->
-        <div class="section">
-            <span class="badge badge-get">GET</span>
-            <h3>2. Get Full CV Details</h3>
-            <span class="endpoint-url">/api/cv/:id</span>
-            <p>Mengambil semua data dari database. Perhatikan format respons yang menyertakan <code>bullets</code> dalam
-                bentuk array JSON.</p>
-
-            <h4>Response Example (Success - 200 OK)</h4>
-            <pre class="success-code">{
+            <h3>Response Sukses (Generate)</h3>
+            <pre><span class="code-label">Response JSON</span>{
   "success": true,
+  "message": "CV generated and saved successfully",
   "data": {
-    "cv_id": "72bccb2e-ae04-4d3c-b5ae-5534d6093763",
-    "title": "My Professional Resume 2026",
-    "pdf_url": "https://.../cv-72bccb2e...pdf",
-    "download_url": "https://.../cv-72bccb2e...pdf?token=...",
-    "personal": {
-      "name": "Jhon Doe",
-      "email": "jhondoe@gmail.com",
-      "summary": "Fullstack developer berpengalaman 5 tahun..."
-    },
-    "experience": [
-      {
-        "id": "cfa426b1-7bac-4421-8f91-d18dfec97ca7",
-        "company": "Tech Corp",
-        "position": "Lead Developer",
-        "start_date": "2022",
-        "end_date": "Present",
-        "bullets": ["Memimpin tim 5 orang", "Optimasi DB"]
-      }
-    ],
-    "skills": [
-      { "id": "ae06e8...", "name": "Dart", "category": "Languages" },
-      { "id": "7be698...", "name": "Go", "category": "Languages" }
-    ],
-    "custom_sections": [
-      {
-        "id": "c2a8a750...",
-        "section_id": "volunteer",
-        "title": "Volunteer Work",
-        "bullets": ["Mengajar coding di desa", "Relawan bencana"]
-      }
-    ],
-    "created_at": "2026-05-01T07:04:52.647Z"
+    "cv_id": "a1b2c3d4-e5f6-4g7h-8i9j-k0l1m2n3o4p5",
+    "title": "Resume 2026",
+    "pdf_url": "https://storage.supabase.co/...",
+    "download_url": "https://storage.supabase.co/.../signed_url_token"
   }
 }</pre>
-        </div>
-        <!-- GET HISTORY BY EMAIL -->
-        <div class="section">
-            <span class="badge badge-get">GET</span>
-            <h3>3. Fetch CV History by Email</h3>
-            <span class="endpoint-url">/api/cv/user/:email</span>
-            <p>Mendapatkan daftar semua CV yang pernah dibuat oleh user berdasarkan alamat email mereka.</p>
+        </section>
 
-            <h4>Response Example (Success - 200 OK)</h4>
-            <pre class="success-code">{
+        <!-- DETAILS -->
+        <section id="details" class="section">
+            <div class="section-header">
+                <span class="badge badge-get">GET</span>
+                <h2>2. Get CV Details</h2>
+                <div class="endpoint-url">/api/cv/:id</div>
+                <p>Mengambil data lengkap CV (Simetris dengan request generate).</p>
+            </div>
+
+            <div class="header-box">
+                <p><strong>Header Wajib:</strong><br>
+                    <code>Authorization</code>: Bearer &lt;token_jwt&gt;
+                </p>
+            </div>
+
+            <h3>Response Sukses (Full CV)</h3>
+            <pre><span class="code-label">Response JSON</span>{
+  "success": true,
+  "data": {
+    "cv_id": "a1b2c3d4-e5f6-4g7h-8i9j-k0l1m2n3o4p5",
+    "title": "Resume 2026",
+    "layout": ["summary", "experience", "education", "skills"],
+    "personal": {
+      "name": "Dimas Febriyanto",
+      "email": "work.dimas@gmail.com",
+      "title": "Senior Flutter Developer"
+    },
+    "summary": "Software Engineer berpengalaman...",
+    "experience": [...],
+    "education": [...],
+    "skills": [...],
+    "projects": [...],
+    "created_at": "2026-05-01T12:00:00Z"
+  }
+}</pre>
+        </section>
+
+        <!-- HISTORY -->
+        <section id="history" class="section">
+            <div class="section-header">
+                <span class="badge badge-get">GET</span>
+                <h2>3. Fetch User History</h2>
+                <div class="endpoint-url">/api/cv/user/:email</div>
+                <p>Mendapatkan daftar CV milik user.</p>
+            </div>
+
+            <h3>Response Sukses (History)</h3>
+            <pre><span class="code-label">Response JSON</span>{
   "success": true,
   "count": 2,
   "cvs": [
     {
-      "id": "72bccb2e-ae04-4d3c-b5ae-5534d6093763",
-      "title": "My Professional Resume 2026",
-      "pdf_url": "https://.../cv-72bccb2e...pdf",
+      "id": "uuid-1",
+      "title": "Resume Software Eng",
+      "pdf_url": "https://...",
       "status": "completed",
-      "created_at": "2026-05-01T07:04:52.647Z"
-    },
-    {
-      "id": "a1b2c3d4-e5f6-4g7h-8i9j-k0l1m2n3o4p5",
-      "title": "CV - Jhon Doe (Updated)",
-      "pdf_url": "https://.../cv-a1b2c3d4...pdf",
-      "status": "completed",
-      "created_at": "2026-04-28T12:00:00.000Z"
+      "created_at": "2026-05-01T..."
     }
   ]
 }</pre>
-        </div>
+        </section>
+
+        <!-- DELETION SYSTEM -->
+        <section id="deletion" class="section">
+            <div class="section-header">
+                <span class="badge badge-delete">Security</span>
+                <h2>4. Secure Deletion System</h2>
+                <p>Proses penghapusan data bersifat permanen dan memerlukan verifikasi ganda.</p>
+            </div>
+
+            <div style="border-left: 4px solid var(--border); padding-left: 25px;">
+                <!-- STEP 1 -->
+                <div style="margin-bottom: 50px;">
+                    <h3 style="color: var(--text-main); margin-bottom: 5px;">Step 1: Request Verification (OTP)</h3>
+                    <div class="endpoint-url">POST /api/cv/delete/request</div>
+                    <pre><span class="code-label">Request Body</span>{
+  "email": "dimassfeb@gmail.com",
+  "cv_id": "optional-uuid"
+}</pre>
+                </div>
+
+                <!-- STEP 2 -->
+                <div>
+                    <h3 style="color: var(--text-main); margin-bottom: 5px;">Step 2: Execute Deletion</h3>
+                    <div class="header-box">
+                        <p><strong>Headers Wajib:</strong><br>
+                            <code>x-owner-email</code>: Email pemilik<br>
+                            <code>x-verification-code</code>: Kode 6-digit
+                        </p>
+                    </div>
+
+                    <div style="margin-bottom: 30px; background: #fafafa; padding: 20px; border-radius: 15px;">
+                        <h4 style="margin-bottom: 10px; color: var(--primary);">A. Delete Single CV</h4>
+                        <div class="endpoint-url">DELETE /api/cv/:id</div>
+                    </div>
+
+                    <div style="background: #fafafa; padding: 20px; border-radius: 15px;">
+                        <h4 style="margin-bottom: 10px; color: var(--primary);">B. Bulk Delete All CVs</h4>
+                        <div class="endpoint-url">DELETE /api/cv/user/:email</div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <footer>
-            &copy; 2026 CVGen API. Build with Node.js & Supabase.
+            <p>&copy; 2026 CVGen API. Dibuat dengan Node.js & Supabase.</p>
+            <div style="margin-top: 15px;">
+                <a href="/privacy.html">Kebijakan Privasi</a>
+            </div>
         </footer>
-    </div>
+    </main>
+
+    <script>
+        // Highlight active nav item on scroll
+        const sections = document.querySelectorAll('.section, header');
+        const navLinks = document.querySelectorAll('.sidebar-nav-link');
+
+        window.onscroll = () => {
+            let current = "";
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').includes(current)) {
+                    link.classList.add('active');
+                }
+            });
+        };
+    </script>
 
 </body>
 

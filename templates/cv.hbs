@@ -134,10 +134,13 @@
   <!-- HEADER -->
   <div class="header">
     <h1>{{personal.name}}</h1>
+    {{#if personal.title}}<div style="font-size: 13pt; font-weight: 400; margin-top: -2pt; margin-bottom: 6pt;">{{personal.title}}</div>{{/if}}
     <div class="contact-info">
       {{#if personal.phone}}<span>{{personal.phone}}</span>{{/if}}
       {{#if personal.email}}<span><a href="mailto:{{personal.email}}">{{personal.email}}</a></span>{{/if}}
-      {{#if personal.linkedin}}<span><a href="{{personal.linkedin}}">LinkedIn</a></span>{{/if}}
+      {{#if personal.github}}<span><a href="{{personal.github}}">{{displayUrl personal.github}}</a></span>{{/if}}
+      {{#if personal.linkedin}}<span><a href="{{personal.linkedin}}">{{displayUrl personal.linkedin}}</a></span>{{/if}}
+      {{#if personal.website}}<span><a href="{{personal.website}}">{{displayUrl personal.website}}</a></span>{{/if}}
       {{#if personal.location}}<span>{{personal.location}}</span>{{/if}}
     </div>
   </div>
@@ -163,7 +166,7 @@
         <div class="entry">
           <div class="entry-row">
             <span class="entry-title">{{this.title}}</span>
-            <span class="entry-date">{{this.start_date}} – {{this.end_date}}</span>
+            <span class="entry-date">{{this.start_date}} – {{#if this.end_date}}{{this.end_date}}{{else}}Present{{/if}}</span>
           </div>
           <div class="entry-subtitle">{{this.company}}{{#if this.location}}, {{this.location}}{{/if}}</div>
           {{#if this.bullets.length}}
@@ -189,7 +192,7 @@
             <span class="entry-date">{{this.start_date}}{{#if this.end_date}} – {{this.end_date}}{{/if}}</span>
           </div>
           {{#if this.technologies.length}}
-          <div class="entry-subtitle">Technologies: {{join this.technologies ", "}}</div>
+          <div class="entry-subtitle"><strong>Technologies:</strong> {{join this.technologies ", "}}</div>
           {{/if}}
           {{#if this.bullets.length}}
           <ul>
@@ -239,7 +242,10 @@
         <div class="entry">
           <div class="entry-row">
             <span class="entry-title">{{this.degree}}</span>
-            <span class="entry-date">{{#if this.start_date}}{{this.start_date}} – {{/if}}{{this.graduation_year}}</span>
+            <span class="entry-date">
+              {{#if this.start_date}}{{this.start_date}} – {{/if}}{{this.graduation_year}}
+              {{#if this.gpa}} | GPA: {{this.gpa}}{{/if}}
+            </span>
           </div>
           <div class="entry-subtitle">{{this.institution}}{{#if this.location}}, {{this.location}}{{/if}}</div>
         </div>
@@ -253,10 +259,11 @@
       {{#each @root.custom_sections as |custom|}}
         <div class="section">
           <div class="section-title">{{custom.title}}</div>
+          {{#if custom.content}}
+          <p>{{custom.content}}</p>
+          {{/if}}
           {{#if custom.bullets.length}}
           <ul>{{#each custom.bullets}}<li>{{this}}</li>{{/each}}</ul>
-          {{else if custom.content}}
-          <p>{{custom.content}}</p>
           {{/if}}
         </div>
       {{/each}}
